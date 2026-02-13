@@ -3,3 +3,5 @@ node_modules
 *.log
 go-app
 tmp
+fast-stream-bot
+fsb

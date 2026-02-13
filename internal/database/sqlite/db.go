@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"log/slog"
 
-	_ "github.com/mattn/go-sqlite3"
 	"github.com/redis/go-redis/v9"
+	_ "modernc.org/sqlite"
 )
 
 func CreateUserTable(ctx context.Context, db *sql.DB) error {
@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS users (
 }
 
 func ConnectToDb(ctx context.Context, connectionString string) (*sql.DB, error) {
-	db, err := sql.Open("sqlite3", connectionString)
+	db, err := sql.Open("sqlite", connectionString)
 	if err != nil {
 		slog.Error(err.Error())
 		return nil, err

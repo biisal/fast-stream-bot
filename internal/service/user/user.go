@@ -13,7 +13,7 @@ import (
 	repo "github.com/biisal/fast-stream-bot/internal/database/sqlite/sqlc"
 	rs "github.com/biisal/fast-stream-bot/internal/redis"
 	"github.com/biisal/fast-stream-bot/internal/types"
-	sqlite3 "github.com/mattn/go-sqlite3"
+	sqlite "modernc.org/sqlite"
 
 	"github.com/gotd/td/tg"
 )
@@ -70,9 +70,9 @@ func (s *svc) GetUserByTgID(ctx context.Context, tgID int64) (*repo.User, error)
 func (s *svc) CreateUser(ctx context.Context, params repo.CreateUserParams) (*repo.User, error) {
 	user, err := s.repo.CreateUser(ctx, params)
 	if err != nil {
-		var sqliteErr sqlite3.Error
+		var sqliteErr *sqlite.Error
 		if errors.As(err, &sqliteErr) {
-			if sqliteErr.ExtendedCode == sqlite3.ErrConstraintUnique {
+			if sqliteErr.Code() == 2067 { // SQLITE_CONSTRAINT_UNIQUE
 				return nil, types.ErrorDuplicate
 			}
 		}
