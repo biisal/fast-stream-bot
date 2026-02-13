@@ -1,11 +1,11 @@
 # AIR CONFIG FOR file-stream-bot
 
 root = "."
-tmp_dir = "tmp/fsb"
+tmp_dir = "tmp/fast-stream-bot"
 
 [build]
-cmd = "go build -o ./tmp/fsb/app ./cmd/fsb"
-bin = "tmp/fsb/app"
+cmd = "go build -o ./tmp/fast-stream-bot/app ./cmd/fsb"
+bin = "tmp/fast-stream-bot/app"
 include_ext = ["go"]
 exclude_dir = [
     "frontend",

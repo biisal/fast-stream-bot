@@ -54,7 +54,7 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-INSTALL_DIR=$HOME/.fsb/bin
+INSTALL_DIR=$HOME/.fast-stream-bot/bin
 mkdir -p "$INSTALL_DIR"
 
 log "System: ${GREEN}$(uname -s)/$(uname -m)${NC}"
@@ -140,6 +140,6 @@ fi
 echo -e "\n------------------------------------------------"
 show_logo
 echo -e "${GREEN}Fast Stream Bot $specific_version successfully installed!${NC}"
-echo -e "Close the terminal and reopen it to run ${GREEN}fsb${NC} command"
+echo -e "Close the terminal and reopen it to run ${GREEN}fast-stream-bot${NC} command"
 echo -e "Documentation: https://github.com/$REPO"
 echo -e "------------------------------------------------\n"

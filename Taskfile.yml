@@ -14,7 +14,7 @@ tasks:
   backend:build:
     desc: Build the backend
     cmds:
-      - go build -o fsb .
+      - go build -o fast-stream-bot ./cmd/fsb
   
   frontend:build:
     desc: Build the frontend

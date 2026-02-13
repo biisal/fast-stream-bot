@@ -8,7 +8,7 @@ default:
 	@echo "$(GREETING)"
 
 backend-build:
-	go build -o fsb .
+	go build -o fast-stream-bot ./cmd/fsb
 
 frontend-build:
 	pnpx @tailwindcss/cli -i ./frontend/assets/styles/input.css -o ./frontend/assets/styles/tailwind.css

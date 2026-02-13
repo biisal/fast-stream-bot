@@ -313,9 +313,6 @@
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
   }
-  .block {
-    display: block;
-  }
   .flex {
     display: flex;
   }
@@ -327,9 +324,6 @@
   }
   .inline-flex {
     display: inline-flex;
-  }
-  .table {
-    display: table;
   }
   .h-4 {
     height: calc(var(--spacing) * 4);
@@ -367,9 +361,6 @@
   .flex-1 {
     flex: 1;
   }
-  .grow {
-    flex-grow: 1;
-  }
   .-translate-y-1\/2 {
     --tw-translate-y: calc(calc(1/2 * 100%) * -1);
     translate: var(--tw-translate-x) var(--tw-translate-y);
@@ -406,11 +397,6 @@
   }
   .gap-6 {
     gap: calc(var(--spacing) * 6);
-  }
-  .truncate {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
   }
   .overflow-x-auto {
     overflow-x: auto;

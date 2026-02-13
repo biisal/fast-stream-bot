@@ -10,7 +10,7 @@ The easiest way to install Fast Stream Bot is using our installer script. Run th
 curl -sfL https://raw.githubusercontent.com/biisal/fast-stream-bot/main/install.sh | bash
 ```
 
-This will automatically download the latest version for your system and install it to `~/.fsb/bin`.
+This will automatically download the latest version for your system and install it to `~/.fast-stream-bot/bin`.
 
 ## Configuration
 
@@ -61,7 +61,7 @@ Before running the bot, you need to configure it.
 Once installed and configured, simply run:
 
 ```bash
-fsb
+fast-stream-bot
 ```
 
 You should see the startup logo and a message indicating the bot is valid and running.

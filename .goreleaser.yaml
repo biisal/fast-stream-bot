@@ -10,7 +10,7 @@ before:
 
 builds:
   - main: ./cmd/fsb
-    binary: fsb
+    binary: fast-stream-bot
     env:
       - CGO_ENABLED=0
     goos:
