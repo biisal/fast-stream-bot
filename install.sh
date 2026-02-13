@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-APP=fsb
+APP=fast-stream-bot
 REPO="biisal/fast-stream-bot"
 
 # Colors
@@ -100,7 +100,16 @@ else
 
     log "Extracting assets..."
     tar -xzf "$tmp_dir/$filename" -C "$tmp_dir"
-    mv "$tmp_dir/$APP" "$INSTALL_DIR/" 2>/dev/null || mv "$tmp_dir/fsb" "$INSTALL_DIR/" 2>/dev/null
+    
+    if [ -f "$tmp_dir/fsb" ]; then
+        mv "$tmp_dir/fsb" "$INSTALL_DIR/$APP"
+    elif [ -f "$tmp_dir/$APP" ]; then
+        mv "$tmp_dir/$APP" "$INSTALL_DIR/$APP"
+    else
+        echo -e "${RED}Error: Binary not found in archive.${NC}"
+        rm -rf "$tmp_dir"
+        exit 1
+    fi
     rm -rf "$tmp_dir"
 fi
 
