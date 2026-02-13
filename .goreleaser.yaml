@@ -33,7 +33,7 @@ archives:
       - goos: windows
         formats: [zip]
 
-changlog:
+changelog:
   sort: asc
   filters:
     exclude:
