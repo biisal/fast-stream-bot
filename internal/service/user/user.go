@@ -10,10 +10,10 @@ import (
 	"log/slog"
 	"time"
 
-	repo "github.com/biisal/fast-stream-bot/internal/database/sqlite/sqlc"
+	repo "github.com/biisal/fast-stream-bot/internal/database/psql/sqlc"
 	rs "github.com/biisal/fast-stream-bot/internal/redis"
 	"github.com/biisal/fast-stream-bot/internal/types"
-	"modernc.org/sqlite"
+	"github.com/jackc/pgx/v5/pgconn"
 
 	"github.com/gotd/td/tg"
 )
@@ -58,7 +58,7 @@ func (s *svc) GetUserByTgID(ctx context.Context, tgID int64) (*repo.User, error)
 
 	u, err := s.repo.GetUserByID(ctx, tgID)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
+		if errors.Is(err, sql.ErrNoRows) || err.Error() == "no rows in result set" {
 			return nil, types.ErrorNotFound
 		}
 		return nil, err
@@ -70,9 +70,9 @@ func (s *svc) GetUserByTgID(ctx context.Context, tgID int64) (*repo.User, error)
 func (s *svc) CreateUser(ctx context.Context, params repo.CreateUserParams) (*repo.User, error) {
 	user, err := s.repo.CreateUser(ctx, params)
 	if err != nil {
-		var sqliteErr *sqlite.Error
-		if errors.As(err, &sqliteErr) {
-			if sqliteErr.Code() == 2067 {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) {
+			if pgErr.Code == "23505" { // unique_violation
 				return nil, types.ErrorDuplicate
 			}
 		}

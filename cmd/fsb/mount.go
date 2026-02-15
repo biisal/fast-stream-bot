@@ -13,8 +13,8 @@ import (
 
 	"github.com/biisal/fast-stream-bot/config"
 	"github.com/biisal/fast-stream-bot/internal/bot"
-	db "github.com/biisal/fast-stream-bot/internal/database/sqlite"
-	repo "github.com/biisal/fast-stream-bot/internal/database/sqlite/sqlc"
+	db "github.com/biisal/fast-stream-bot/internal/database/psql"
+	repo "github.com/biisal/fast-stream-bot/internal/database/psql/sqlc"
 	"github.com/biisal/fast-stream-bot/internal/http-server/routers"
 	"github.com/biisal/fast-stream-bot/internal/http-server/shortner"
 	rd "github.com/biisal/fast-stream-bot/internal/redis"
@@ -55,7 +55,7 @@ func runServer(cfg config.Config, worker *bot.Worker, redisClient rd.RedisServic
 	return nil
 }
 
-func mount(cfg config.Config) error {
+func mount(cfg config.Config, flags AppFlags) error {
 	ctx := context.Background()
 	file, err := logger.SetupSlog(cfg.ENVIRONMENT, logger.StdoutHandler)
 	if err != nil {
@@ -70,7 +70,7 @@ func mount(cfg config.Config) error {
 		}
 	}()
 
-	dbConn, err := db.CreateConn(ctx, cfg.DBSTRING)
+	dbConn, err := db.CreateConn(ctx, cfg.DBSTRING, flags.InitDB)
 	if err != nil {
 		slog.Error("Error connecting to database", "error", err)
 		return err
@@ -79,7 +79,7 @@ func mount(cfg config.Config) error {
 
 	r := repo.New(dbConn)
 
-	redisConn, rdNew, err := rd.New(ctx, cfg.REDIS_CONFIG.ADDRESS)
+	redisConn, rdNew, err := rd.New(ctx, cfg.REDIS_DBSTRING)
 	if err != nil {
 		slog.Error("Error connecting to redis", "error", err)
 		return err

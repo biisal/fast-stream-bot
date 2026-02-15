@@ -7,7 +7,8 @@ import (
 func main() {
 	printLogo("v1.0.0")
 	cfg := config.MustLoad("")
-	if err := mount(cfg); err != nil {
+	flags := perseFlags()
+	if err := mount(cfg, flags); err != nil {
 		panic(err)
 	}
 }

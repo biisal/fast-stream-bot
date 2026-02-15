@@ -15,7 +15,7 @@ import (
 	"time"
 
 	"github.com/biisal/fast-stream-bot/config"
-	repo "github.com/biisal/fast-stream-bot/internal/database/sqlite/sqlc"
+	repo "github.com/biisal/fast-stream-bot/internal/database/psql/sqlc"
 	"github.com/biisal/fast-stream-bot/internal/service/user"
 	"github.com/biisal/fast-stream-bot/internal/types"
 	"github.com/gotd/td/telegram"

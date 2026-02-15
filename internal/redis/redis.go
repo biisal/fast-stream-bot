@@ -19,12 +19,14 @@ type svc struct {
 	r *redis.Client
 }
 
-func New(ctx context.Context, addr string) (*redis.Client, RedisService, error) {
-	client := redis.NewClient(&redis.Options{
-		Addr: addr,
-		DB:   0,
-	})
-	err := client.Ping(ctx).Err()
+func New(ctx context.Context, connString string) (*redis.Client, RedisService, error) {
+	opt, err := redis.ParseURL(connString)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	client := redis.NewClient(opt)
+	err = client.Ping(ctx).Err()
 	if err != nil {
 		defer client.Close()
 		return nil, nil, err

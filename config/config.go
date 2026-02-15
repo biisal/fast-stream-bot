@@ -22,10 +22,6 @@ type ShortnerConfig struct {
 	UUID_EXPIRATION int    `env:"UUID_EXPIRATION"`
 }
 
-type RedisConfig struct {
-	ADDRESS string `env:"REDIS_ADDRESS"`
-}
-
 type AppConfig struct {
 	APP_NAME             string `toml:"app_name" env:"APP_NAME"`
 	ENV_FILE             string `toml:"env_file" env:"ENV_FILE"`
@@ -39,24 +35,25 @@ type AppConfig struct {
 
 type Config struct {
 	AppConfig
-	BOT_TOKENS_STRING     string `env:"BOT_TOKENS"`
+
+	BOT_TOKENS_STRING     string `env:"BOT_TOKENS" env-required:"true"`
 	BOT_TOKENS            []string
 	APP_KEY               int    `env:"APP_KEY" env-required:"true"`
-	APP_HASH              string `env:"APP_HASH"`
-	ADMIN_ID              int64  `env:"ADMIN_ID"`
-	DB_CHANNEL_ID         int64  `env:"DB_CHANNEL_ID"`
-	MAIN_CHANNEL_USERNAME string `env:"MAIN_CHANNEL_USERNAME"`
+	APP_HASH              string `env:"APP_HASH" env-required:"true"`
+	ADMIN_ID              int64  `env:"ADMIN_ID" env-required:"true"`
+	DB_CHANNEL_ID         int64  `env:"DB_CHANNEL_ID" env-required:"true"`
+	MAIN_CHANNEL_USERNAME string `env:"MAIN_CHANNEL_USERNAME" env-required:"true"`
 	HTTP_PORT             int    `env:"HTTP_PORT"`
 	HTTP_SCHEME           string
 	FQDN                  string `env:"FQDN"`
 	ENVIRONMENT           string `env:"ENVIRONMENT"`
 	LOG_CHANNEL_ID        int64  `env:"LOG_CHANNEL_ID"`
 	MAIN_CHANNEL_ID       int64  `env:"MAIN_CHANNEL_ID"`
-	DBSTRING              string `env:"DBSTRING"`
+	DBSTRING              string `env:"DBSTRING" env-required:"true"`
 
 	ShortnerConfig
 
-	REDIS_CONFIG RedisConfig
+	REDIS_DBSTRING string `env:"REDIS_DBSTRING" env-required:"true"`
 }
 
 func perseTokens(tokenString string) (s []string) {

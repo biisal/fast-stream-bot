@@ -11,7 +11,7 @@ import (
 
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (id, credit)
-VALUES (?, ?)
+VALUES ($1, $2)
 RETURNING id, created_at, updated_at, total_links, credit, last_credit_update, is_banned, is_deleted, is_verified, is_premium
 `
 
@@ -21,7 +21,7 @@ type CreateUserParams struct {
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (*User, error) {
-	row := q.db.QueryRowContext(ctx, createUser, arg.ID, arg.Credit)
+	row := q.db.QueryRow(ctx, createUser, arg.ID, arg.Credit)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -40,18 +40,18 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (*User, 
 
 const decrementCredit = `-- name: DecrementCredit :one
 UPDATE users
-SET credit = credit - ?
-WHERE id = ?
+SET credit = credit - $2
+WHERE id = $1
 RETURNING id, created_at, updated_at, total_links, credit, last_credit_update, is_banned, is_deleted, is_verified, is_premium
 `
 
 type DecrementCreditParams struct {
-	Credit int32 `json:"credit"`
 	ID     int64 `json:"id"`
+	Credit int32 `json:"credit"`
 }
 
 func (q *Queries) DecrementCredit(ctx context.Context, arg DecrementCreditParams) (*User, error) {
-	row := q.db.QueryRowContext(ctx, decrementCredit, arg.Credit, arg.ID)
+	row := q.db.QueryRow(ctx, decrementCredit, arg.ID, arg.Credit)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -70,12 +70,12 @@ func (q *Queries) DecrementCredit(ctx context.Context, arg DecrementCreditParams
 
 const deleteUser = `-- name: DeleteUser :exec
 UPDATE users
-SET is_deleted = 1
-WHERE id = ?
+SET is_deleted = true
+WHERE id = $1
 `
 
 func (q *Queries) DeleteUser(ctx context.Context, id int64) error {
-	_, err := q.db.ExecContext(ctx, deleteUser, id)
+	_, err := q.db.Exec(ctx, deleteUser, id)
 	return err
 }
 
@@ -85,7 +85,7 @@ FROM users
 `
 
 func (q *Queries) GetAllUsers(ctx context.Context) ([]*User, error) {
-	rows, err := q.db.QueryContext(ctx, getAllUsers)
+	rows, err := q.db.Query(ctx, getAllUsers)
 	if err != nil {
 		return nil, err
 	}
@@ -109,9 +109,6 @@ func (q *Queries) GetAllUsers(ctx context.Context) ([]*User, error) {
 		}
 		items = append(items, &i)
 	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
@@ -121,11 +118,11 @@ func (q *Queries) GetAllUsers(ctx context.Context) ([]*User, error) {
 const getTotalActiveUsersCount = `-- name: GetTotalActiveUsersCount :one
 SELECT COUNT(*)
 FROM users
-WHERE is_deleted = 0
+WHERE is_deleted = false
 `
 
 func (q *Queries) GetTotalActiveUsersCount(ctx context.Context) (int64, error) {
-	row := q.db.QueryRowContext(ctx, getTotalActiveUsersCount)
+	row := q.db.QueryRow(ctx, getTotalActiveUsersCount)
 	var count int64
 	err := row.Scan(&count)
 	return count, err
@@ -134,12 +131,12 @@ func (q *Queries) GetTotalActiveUsersCount(ctx context.Context) (int64, error) {
 const getUserByID = `-- name: GetUserByID :one
 SELECT id, created_at, updated_at, total_links, credit, last_credit_update, is_banned, is_deleted, is_verified, is_premium
 FROM users
-WHERE id = ? AND is_deleted = 0
+WHERE id = $1 AND is_deleted = false
 LIMIT 1
 `
 
 func (q *Queries) GetUserByID(ctx context.Context, id int64) (*User, error) {
-	row := q.db.QueryRowContext(ctx, getUserByID, id)
+	row := q.db.QueryRow(ctx, getUserByID, id)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -158,18 +155,18 @@ func (q *Queries) GetUserByID(ctx context.Context, id int64) (*User, error) {
 
 const incrementCredit = `-- name: IncrementCredit :one
 UPDATE users
-SET credit = credit + ?
-WHERE id = ?
+SET credit = credit + $2
+WHERE id = $1
 RETURNING id, created_at, updated_at, total_links, credit, last_credit_update, is_banned, is_deleted, is_verified, is_premium
 `
 
 type IncrementCreditParams struct {
-	Credit int32 `json:"credit"`
 	ID     int64 `json:"id"`
+	Credit int32 `json:"credit"`
 }
 
 func (q *Queries) IncrementCredit(ctx context.Context, arg IncrementCreditParams) (*User, error) {
-	row := q.db.QueryRowContext(ctx, incrementCredit, arg.Credit, arg.ID)
+	row := q.db.QueryRow(ctx, incrementCredit, arg.ID, arg.Credit)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -188,19 +185,19 @@ func (q *Queries) IncrementCredit(ctx context.Context, arg IncrementCreditParams
 
 const incrementCreditWithDate = `-- name: IncrementCreditWithDate :one
 UPDATE users
-SET credit = credit + ?,
-    last_credit_update = CURRENT_TIMESTAMP
-WHERE id = ?
+SET credit = credit + $2,
+    last_credit_update = now()
+WHERE id = $1
 RETURNING id, created_at, updated_at, total_links, credit, last_credit_update, is_banned, is_deleted, is_verified, is_premium
 `
 
 type IncrementCreditWithDateParams struct {
-	Credit int32 `json:"credit"`
 	ID     int64 `json:"id"`
+	Credit int32 `json:"credit"`
 }
 
 func (q *Queries) IncrementCreditWithDate(ctx context.Context, arg IncrementCreditWithDateParams) (*User, error) {
-	row := q.db.QueryRowContext(ctx, incrementCreditWithDate, arg.Credit, arg.ID)
+	row := q.db.QueryRow(ctx, incrementCreditWithDate, arg.ID, arg.Credit)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -218,11 +215,11 @@ func (q *Queries) IncrementCreditWithDate(ctx context.Context, arg IncrementCred
 }
 
 const incrementTotalLinks = `-- name: IncrementTotalLinks :one
-UPDATE users SET total_links = total_links + 1 WHERE id = ? RETURNING id, created_at, updated_at, total_links, credit, last_credit_update, is_banned, is_deleted, is_verified, is_premium
+UPDATE users SET total_links = total_links + 1 WHERE id = $1 RETURNING id, created_at, updated_at, total_links, credit, last_credit_update, is_banned, is_deleted, is_verified, is_premium
 `
 
 func (q *Queries) IncrementTotalLinks(ctx context.Context, id int64) (*User, error) {
-	row := q.db.QueryRowContext(ctx, incrementTotalLinks, id)
+	row := q.db.QueryRow(ctx, incrementTotalLinks, id)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -242,11 +239,11 @@ func (q *Queries) IncrementTotalLinks(ctx context.Context, id int64) (*User, err
 const updateUserByID = `-- name: UpdateUserByID :one
 UPDATE users
 SET
-    is_banned   = ?,
-    is_premium  = ?,
-    is_verified = ?,
-    total_links = ?
-WHERE id = ?
+    is_banned   = $1,
+    is_premium  = $2,
+    is_verified = $3,
+    total_links = $4
+WHERE id = $5
 RETURNING id, created_at, updated_at, total_links, credit, last_credit_update, is_banned, is_deleted, is_verified, is_premium
 `
 
@@ -259,7 +256,7 @@ type UpdateUserByIDParams struct {
 }
 
 func (q *Queries) UpdateUserByID(ctx context.Context, arg UpdateUserByIDParams) (*User, error) {
-	row := q.db.QueryRowContext(ctx, updateUserByID,
+	row := q.db.QueryRow(ctx, updateUserByID,
 		arg.IsBanned,
 		arg.IsPremium,
 		arg.IsVerified,

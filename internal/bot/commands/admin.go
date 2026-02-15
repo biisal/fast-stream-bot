@@ -9,7 +9,7 @@ import (
 	"sync/atomic"
 
 	botutils "github.com/biisal/fast-stream-bot/internal/bot/bot-utils"
-	repo "github.com/biisal/fast-stream-bot/internal/database/sqlite/sqlc"
+	repo "github.com/biisal/fast-stream-bot/internal/database/psql/sqlc"
 	"github.com/gotd/td/telegram/peers"
 	"github.com/gotd/td/tg"
 )

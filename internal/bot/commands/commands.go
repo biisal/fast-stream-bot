@@ -10,7 +10,7 @@ import (
 
 	"github.com/biisal/fast-stream-bot/config"
 	botutils "github.com/biisal/fast-stream-bot/internal/bot/bot-utils"
-	repo "github.com/biisal/fast-stream-bot/internal/database/sqlite/sqlc"
+	repo "github.com/biisal/fast-stream-bot/internal/database/psql/sqlc"
 	"github.com/biisal/fast-stream-bot/internal/service/user"
 	"github.com/gotd/td/telegram"
 	"github.com/gotd/td/telegram/message"
