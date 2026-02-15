@@ -4,7 +4,6 @@ node_modules
 go-app
 tmp
 fast-stream-bot
-fsb
 dist
 pnpm-lock.yaml
 bin

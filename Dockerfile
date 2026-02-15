@@ -1,13 +1,12 @@
 # Stage 1: Build Frontend
-FROM node:22-alpine AS frontend-builder
+FROM oven/bun:1-alpine AS frontend-builder
 WORKDIR /app
-RUN npm install -g pnpm
 
-COPY package.json pnpm-lock.yaml* ./
-RUN pnpm install
+COPY package.json ./
+RUN bun install
 
 COPY frontend ./frontend
-RUN pnpm dlx @tailwindcss/cli -i ./frontend/assets/styles/input.css -o ./frontend/assets/styles/tailwind.css --minify
+RUN bunx @tailwindcss/cli -i ./frontend/assets/styles/input.css -o ./frontend/assets/styles/tailwind.css --minify
 
 # Stage 2: Build Backend
 FROM golang:1.24-alpine AS backend-builder
