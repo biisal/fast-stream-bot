@@ -36,7 +36,8 @@ Before running the bot, you need to configure it.
     DB_CHANNEL_ID=-100xxxxxxxxxx
     MAIN_CHANNEL_ID=-100xxxxxxxxxx
     MAIN_CHANNEL_USERNAME=your_channel_username
-    REDIS_ADDRESS=127.0.0.1:6379
+    DBSTRING=your-psql-connection-string (get it from neon.com db [one day we will sponsor .. lol])
+    REDIS_DBSTRING=your-redis-connection-string (get it from upstash.com)
     ```
     > **Note:** You can get `APP_KEY` and `APP_HASH` from [my.telegram.org](https://my.telegram.org).
 

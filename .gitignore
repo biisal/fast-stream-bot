@@ -6,3 +6,5 @@ tmp
 fast-stream-bot
 fsb
 dist
+pnpm-lock.yaml
+bin
