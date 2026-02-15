@@ -39,7 +39,7 @@ func New(ctx context.Context, connString string) (*redis.Client, RedisService, e
 
 func (c *svc) Get(ctx context.Context, key string) []byte {
 	b, err := c.r.Get(ctx, key).Bytes()
-	if err != nil {
+	if err != nil && err != redis.Nil {
 		slog.Error("Failed to get data from redis", "error", err)
 		return nil
 	}
