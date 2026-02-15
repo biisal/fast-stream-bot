@@ -1,0 +1,10 @@
+
+node_modules
+bin
+dist
+.git
+.env
+.DS_Store
+fast-stream-bot
+fsb
+frontend/assets/styles/tailwind.css

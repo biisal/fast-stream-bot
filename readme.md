@@ -67,6 +67,25 @@ fast-stream-bot
 
 You should see the startup logo and a message indicating the bot is valid and running.
 
+## Run with Docker
+
+You can also run the bot using Docker. This method ensures you have a consistent environment.
+
+1.  **Build the Docker image:**
+    ```bash
+    docker build -t fast-stream-bot .
+    ```
+
+2.  **Run the container:**
+    ```bash
+    docker run -d \
+      --name fast-stream-bot \
+      -p 8000:8000 \
+      -v $(pwd)/config.toml:/app/config.toml \
+      -v $(pwd)/.env:/app/.env \
+      fast-stream-bot
+    ```
+
 ## Features at a Glance
 
 -   **Instant Links:** Stream or download files instantly.
