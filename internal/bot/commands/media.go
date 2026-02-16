@@ -19,22 +19,24 @@ type MediaForwardParams struct {
 }
 
 func (bc *Context) MediaForwarding(params MediaForwardParams) (tg.UpdatesClass, error) {
-	if bc.dbUser.Credit < params.Cfg.MIN_CREDITS_REQUIRED {
-		referUrl := botutils.GetReferLink(bc.userInfo.Username, bc.userInfo.ID)
-		now := time.Now()
-		nextMidnight := time.Date(now.Year(), now.Month(), now.Day()+1, 0, 0, 0, 0, now.Location())
-		btn := markup.InlineKeyboard(
-			markup.Row(
-				markup.URL("Get Credits By Refer", referUrl),
-			),
-		)
-		msg := fmt.Sprintf(
-			"You're out of credits! 😢\nYou need %d more credits to use this bot.\n\nWait for %s to get new credits or Refer one user to earn %d credits.",
-			params.Cfg.MIN_CREDITS_REQUIRED-bc.dbUser.Credit,
-			nextMidnight.Sub(now).Round(time.Second).String(),
-			params.Cfg.INCREMENT_CREDITS,
-		)
-		return bc.builder.Markup(btn).Text(bc.ctx, msg)
+	if params.Cfg.REF {
+		if bc.dbUser.Credit < params.Cfg.MIN_CREDITS_REQUIRED {
+			referUrl := botutils.GetReferLink(bc.userInfo.Username, bc.userInfo.ID)
+			now := time.Now()
+			nextMidnight := time.Date(now.Year(), now.Month(), now.Day()+1, 0, 0, 0, 0, now.Location())
+			btn := markup.InlineKeyboard(
+				markup.Row(
+					markup.URL("Get Credits By Refer", referUrl),
+				),
+			)
+			msg := fmt.Sprintf(
+				"You're out of credits! 😢\nYou need %d more credits to use this bot.\n\nWait for %s to get new credits or Refer one user to earn %d credits.",
+				params.Cfg.MIN_CREDITS_REQUIRED-bc.dbUser.Credit,
+				nextMidnight.Sub(now).Round(time.Second).String(),
+				params.Cfg.INCREMENT_CREDITS,
+			)
+			return bc.builder.Markup(btn).Text(bc.ctx, msg)
+		}
 	}
 
 	m := params.Update.Message.(*tg.Message)
@@ -69,10 +71,14 @@ func (bc *Context) MediaForwarding(params MediaForwardParams) (tg.UpdatesClass, 
 	}
 
 	msg := fmt.Sprintf(
-		"Your file is ready to watch or download!\n\n%s\n\nYou have %d credits to use 😊",
+		"Your file is ready to watch or download!\n\n%s",
 		fileMsg,
-		bc.dbUser.Credit,
 	)
+
+	if params.Cfg.REF {
+		msg += fmt.Sprintf("\n\nYou have %d credits to use 😊", bc.dbUser.Credit)
+	}
+
 	btn := markup.InlineKeyboard(
 		markup.Row(
 			markup.URL("Watch or Download", streamLink),

@@ -54,6 +54,7 @@ type Config struct {
 	ShortnerConfig
 
 	REDIS_DBSTRING string `env:"REDIS_DBSTRING" env-required:"true"`
+	REF            bool
 }
 
 func perseTokens(tokenString string) (s []string) {
