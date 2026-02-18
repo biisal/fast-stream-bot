@@ -27,7 +27,7 @@ tasks:
     desc: Run the bot
     deps: [backend:build, frontend:build]
     cmds:
-      - go run ./cmd/fsb
+      - go run ./cmd/fsb -init-db
 
   backend:dev:
     desc: Run the backend in development mode

@@ -1,3 +1,4 @@
+// Package logger provides a logger that writes to both stdout and a file.
 package logger
 
 import (
@@ -5,56 +6,15 @@ import (
 	"io"
 	"log/slog"
 	"os"
-	"path/filepath"
-	"runtime"
-	"strconv"
 
 	"github.com/biisal/fast-stream-bot/config"
 )
 
-type ShortSourceHandler struct {
-	slog.Handler
-}
-
-type HandlerType string
-
-const (
-	FileHandler   HandlerType = "fileHandler"
-	StdoutHandler HandlerType = "stdoutHandler"
-	HandlerMulti  HandlerType = "multiHandler"
-)
-
-func (h ShortSourceHandler) Handle(ctx context.Context, r slog.Record) error {
-	if r.PC != 0 {
-		frames := runtime.CallersFrames([]uintptr{r.PC})
-		frame, _ := frames.Next()
-		if frame.File != "" {
-			filename := filepath.Base(frame.File)
-			r.AddAttrs(slog.String("source", filename+":"+strconv.Itoa(frame.Line)))
-		}
-	}
-	return h.Handler.Handle(ctx, r)
-}
-
-// Required methods for a proper slog.Handler
-func (h ShortSourceHandler) Enabled(ctx context.Context, level slog.Level) bool {
-	return h.Handler.Enabled(ctx, level)
-}
-
-func (h ShortSourceHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
-	return ShortSourceHandler{Handler: h.Handler.WithAttrs(attrs)}
-}
-
-func (h ShortSourceHandler) WithGroup(name string) slog.Handler {
-	return ShortSourceHandler{Handler: h.Handler.WithGroup(name)}
-}
-
-// MultiHandler writes to multiple handlers
-type MultiHandler struct {
+type multiHandler struct {
 	handlers []slog.Handler
 }
 
-func (m MultiHandler) Enabled(ctx context.Context, level slog.Level) bool {
+func (m multiHandler) Enabled(ctx context.Context, level slog.Level) bool {
 	for _, h := range m.handlers {
 		if h.Enabled(ctx, level) {
 			return true
@@ -63,67 +23,48 @@ func (m MultiHandler) Enabled(ctx context.Context, level slog.Level) bool {
 	return false
 }
 
-func (m MultiHandler) Handle(ctx context.Context, r slog.Record) error {
+func (m multiHandler) Handle(ctx context.Context, r slog.Record) error {
 	for _, h := range m.handlers {
-		_ = h.Handle(ctx, r) // fire and forget (or collect errors if you want)
+		_ = h.Handle(ctx, r)
 	}
 	return nil
 }
 
-func (m MultiHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
+func (m multiHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
 	copies := make([]slog.Handler, len(m.handlers))
 	for i, h := range m.handlers {
 		copies[i] = h.WithAttrs(attrs)
 	}
-	return MultiHandler{handlers: copies}
+	return multiHandler{handlers: copies}
 }
 
-func (m MultiHandler) WithGroup(name string) slog.Handler {
+func (m multiHandler) WithGroup(name string) slog.Handler {
 	copies := make([]slog.Handler, len(m.handlers))
 	for i, h := range m.handlers {
 		copies[i] = h.WithGroup(name)
 	}
-	return MultiHandler{handlers: copies}
+	return multiHandler{handlers: copies}
 }
 
-func SetupSlog(env string, handlerType HandlerType) (io.Closer, error) {
-	var level slog.Leveler = slog.LevelError
+func Setup(env string) (io.Closer, error) {
+	stdoutLevel := slog.LevelInfo
 	if env == config.ENVIRONMENT_LOCAL {
-		level = slog.LevelInfo
+		stdoutLevel = slog.LevelDebug
 	}
 
-	opts := &slog.HandlerOptions{
-		Level:     level,
-		AddSource: false,
+	stdoutOpts := &slog.HandlerOptions{Level: stdoutLevel}
+	fileOpts := &slog.HandlerOptions{Level: slog.LevelError}
+
+	file, err := os.OpenFile("fsb.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
+	if err != nil {
+		return nil, err
 	}
 
-	var logFile *os.File
-	var handler slog.Handler
+	fileHandler := slog.NewTextHandler(file, fileOpts)
+	stdoutHandler := slog.NewTextHandler(os.Stdout, stdoutOpts)
 
-	switch handlerType {
-	case FileHandler, HandlerMulti:
-		f, err := os.OpenFile("fsb.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-		if err != nil {
-			return nil, err
-		}
-		logFile = f
-	}
+	handler := multiHandler{handlers: []slog.Handler{fileHandler, stdoutHandler}}
+	slog.SetDefault(slog.New(handler))
 
-	switch handlerType {
-	case FileHandler:
-		handler = slog.NewTextHandler(logFile, opts)
-
-	case StdoutHandler:
-		handler = slog.NewTextHandler(os.Stdout, opts)
-
-	case HandlerMulti:
-		fileH := slog.NewTextHandler(logFile, opts)
-		stdoutH := slog.NewTextHandler(os.Stdout, opts)
-		handler = MultiHandler{handlers: []slog.Handler{fileH, stdoutH}}
-	}
-
-	wrapped := ShortSourceHandler{Handler: handler}
-	slog.SetDefault(slog.New(wrapped))
-
-	return logFile, nil
+	return file, nil
 }

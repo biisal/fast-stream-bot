@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
+	"log/slog"
 	"runtime/debug"
 
-	"github.com/biisal/fast-stream-bot/internal/console"
 	"github.com/fatih/color"
 )
 
@@ -30,5 +30,5 @@ Thanks for using
 ⭐ Star on GitHub: %s
 %s
 `, gitLink, versionStr)
-	console.Print(logo)
+	slog.Info(logo)
 }

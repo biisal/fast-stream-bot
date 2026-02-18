@@ -3,10 +3,9 @@ package bot
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"sync"
 	"time"
-
-	"github.com/biisal/fast-stream-bot/internal/console"
 
 	"github.com/biisal/fast-stream-bot/config"
 	"github.com/biisal/fast-stream-bot/internal/service/user"
@@ -62,15 +61,16 @@ func startClient(worker *Worker, botToken string, cfg *config.Config, workerNum 
 		if self.Bot {
 			bot.BotUserName = self.Username
 		}
-		console.Info("Bot started: %s", bot.BotUserName)
+		slog.Info("Bot started", "bot_username", bot.BotUserName)
 		bot.Sender.To(&tg.InputPeerUser{UserID: cfg.ADMIN_ID}).Text(ctx, "Bot is running")
 		done = true
 		wg.Done()
 		<-ctx.Done()
 		return nil
 	}); err != nil {
-		console.Error("Failed to start bot: %v", err)
+		slog.Error("Failed to start bot", "error", err)
 	}
+
 }
 
 func StartWorkers(cfg *config.Config, userService user.Service) *Worker {
@@ -80,9 +80,9 @@ func StartWorkers(cfg *config.Config, userService user.Service) *Worker {
 		wg.Add(1)
 		go startClient(worker, botToken, cfg, i, &wg, userService)
 	}
-	console.Debug("Waiting for bot workers to start")
+	slog.Debug("Waiting for bot workers to start")
 	wg.Wait()
-	console.Success("Bot workers started")
+	slog.Info("Bot workers started")
 	return worker
 }
 

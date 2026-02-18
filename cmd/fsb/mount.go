@@ -58,7 +58,7 @@ func runServer(cfg config.Config, worker *bot.Worker, redisClient rd.RedisServic
 func mount(cfg config.Config, flags AppFlags) error {
 	ctx := context.Background()
 	cfg.REF = flags.Ref
-	file, err := logger.SetupSlog(cfg.ENVIRONMENT, logger.StdoutHandler)
+	file, err := logger.Setup(cfg.ENVIRONMENT)
 	if err != nil {
 		log.Fatal("Error setting up logger", "error", err.Error())
 	}

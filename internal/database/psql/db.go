@@ -1,13 +1,16 @@
+// Package db contains database related functions
 package db
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
 )
 
 func initDBTable(ctx context.Context, db *pgxpool.Pool) error {
+	slog.Info("Initializing database")
 	query := `
 CREATE TABLE IF NOT EXISTS users (
     id BIGINT PRIMARY KEY,

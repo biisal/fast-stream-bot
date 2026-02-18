@@ -37,4 +37,4 @@ COPY --from=frontend-builder /app/frontend/assets/styles/tailwind.css ./frontend
 # Expose port (default 8000)
 EXPOSE 8000
 
-CMD ["./fast-stream-bot"]
+CMD ["./fast-stream-bot" , "-init-db"]

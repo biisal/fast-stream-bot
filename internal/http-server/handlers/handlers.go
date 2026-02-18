@@ -1,3 +1,4 @@
+// Package handlers contains the handlers for the http server
 package handlers
 
 import (
@@ -29,7 +30,7 @@ type StreamHandler struct {
 
 func (h *StreamHandler) ServerFile() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		messageId, channelId, err := botutils.ParseMessageAndChannelId(r.PathValue("messageId"), r.PathValue("channelId"), h.Cfg.DB_CHANNEL_ID)
+		messageID, channelID, err := botutils.ParseMessageAndChannelId(r.PathValue("messageId"), r.PathValue("channelId"), h.Cfg.DB_CHANNEL_ID)
 		if err != nil {
 			slog.Error("failed to parse messageId and channelId", "error", err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -37,7 +38,7 @@ func (h *StreamHandler) ServerFile() http.HandlerFunc {
 		}
 
 		downloadQuery := strings.TrimSpace(r.URL.Query().Get("d"))
-		isDownload := false
+		var isDownload bool
 		if downloadQuery == "1" || strings.ToLower(downloadQuery) == "true" {
 			isDownload = true
 		}
@@ -50,7 +51,7 @@ func (h *StreamHandler) ServerFile() http.HandlerFunc {
 		}
 		defer h.Worker.ReleaseWorker(bot)
 
-		fileMsg, err := botutils.GetChannelMessage(r.Context(), channelId, messageId, bot.Client.API())
+		fileMsg, err := botutils.GetChannelMessage(r.Context(), channelID, messageID, bot.Client.API())
 
 		if err != nil {
 			slog.Error("Failed to get file message", "error", err)
@@ -72,7 +73,7 @@ func (h *StreamHandler) ServerFile() http.HandlerFunc {
 		}
 
 		reader := stream.NewTgFileReader(bot.Client.API(), r.Context(), file.Location, file, r)
-		if err := reader.SetupStream(r, w, isDownload); err != nil {
+		if err = reader.SetupStream(r, w, isDownload); err != nil {
 			slog.Error("Failed to setup stream", "error", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -101,7 +102,7 @@ func (h *StreamHandler) ServerFile() http.HandlerFunc {
 
 }
 
-func renderHtml(w http.ResponseWriter, htmlTemplate string, data any) {
+func renderHTML(w http.ResponseWriter, htmlTemplate string, data any) {
 	t, err := template.ParseFiles("frontend/" + htmlTemplate)
 	if err != nil {
 		slog.Error("Failed to parse template", "error", err)
@@ -119,14 +120,14 @@ func (h *StreamHandler) HomeStream() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		var errorResp = &types.ErrorResponse{Error: ""}
-		messageId, channelId, err := botutils.ParseMessageAndChannelId(r.PathValue("messageId"), r.PathValue("channelId"), h.Cfg.DB_CHANNEL_ID)
+		messageID, channelID, err := botutils.ParseMessageAndChannelId(r.PathValue("messageId"), r.PathValue("channelId"), h.Cfg.DB_CHANNEL_ID)
 		if err != nil {
 			errorResp.Error = err.Error()
-			renderHtml(w, "error.html", errorResp)
+			renderHTML(w, "error.html", errorResp)
 			return
 		}
 		hash := r.URL.Query().Get("hash")
-		streamLink := fmt.Sprintf("/stream/%d/%d/%s", channelId, messageId, hash)
+		streamLink := fmt.Sprintf("/stream/%d/%d/%s", channelID, messageID, hash)
 
 		if strings.Contains(strings.ToLower(r.Header.Get("User-Agent")), "vlc") {
 			http.Redirect(w, r, streamLink, http.StatusSeeOther)
@@ -139,21 +140,21 @@ func (h *StreamHandler) HomeStream() http.HandlerFunc {
 			slog.Info("No jwt found")
 			if h.Shortner.VerifyUUID(r) {
 				slog.Info("Found valid uuid")
-				if err := h.Shortner.SetJWTCookie(w); err == nil {
+				if err = h.Shortner.SetJWTCookie(w); err == nil {
 					isJustVerified = true
 					h.Shortner.RemoveUUID(r)
 				}
 			} else {
 				var uuid = h.Shortner.SetUUID(r)
-				reqUri := r.URL.RequestURI()
+				reqURI := r.URL.RequestURI()
 				separator := "?"
-				if strings.Contains(reqUri, "?") {
+				if strings.Contains(reqURI, "?") {
 					separator = "&"
 				}
-				finalUrl := fmt.Sprintf("%s://%s%s%suuid=%s", h.Cfg.HTTP_SCHEME, r.Host, reqUri, separator, uuid)
-				if redirectUrl := h.Shortner.CreateShortnerLink(finalUrl); redirectUrl != "" {
-					slog.Info("Redirecting to shortner link", "url", redirectUrl)
-					http.Redirect(w, r, redirectUrl, http.StatusSeeOther)
+				finalURL := fmt.Sprintf("%s://%s%s%suuid=%s", h.Cfg.HTTP_SCHEME, r.Host, reqURI, separator, uuid)
+				if redirectURL := h.Shortner.CreateShortnerLink(finalURL); redirectURL != "" {
+					slog.Info("Redirecting to shortner link", "url", redirectURL)
+					http.Redirect(w, r, redirectURL, http.StatusSeeOther)
 					return
 				}
 
@@ -172,16 +173,16 @@ func (h *StreamHandler) HomeStream() http.HandlerFunc {
 		if err != nil {
 			slog.Error("failed to get bots", "error", err)
 			errorResp.Error = "Failed to get bots. Try again later or contact to developer"
-			renderHtml(w, "error.html", errorResp)
+			renderHTML(w, "error.html", errorResp)
 			return
 		}
 		defer h.Worker.ReleaseWorker(client)
 
-		fileMsg, err := botutils.GetChannelMessage(r.Context(), channelId, messageId, client.Client.API())
+		fileMsg, err := botutils.GetChannelMessage(r.Context(), channelID, messageID, client.Client.API())
 		if err != nil {
 			slog.Error("Failed to get file message", "error", err)
 			errorResp.Error = "Failed to get file message. Check your URL"
-			renderHtml(w, "error.html", errorResp)
+			renderHTML(w, "error.html", errorResp)
 			return
 		}
 
@@ -189,14 +190,14 @@ func (h *StreamHandler) HomeStream() http.HandlerFunc {
 		if err != nil {
 			slog.Error("Failed to get media from message", "error", err)
 			errorResp.Error = "Failed to get media from message. Check your URL"
-			renderHtml(w, "error.html", errorResp)
+			renderHTML(w, "error.html", errorResp)
 			return
 		}
 
 		if !botutils.CheckFileHash(file, hash) {
 			slog.Error("Invalid hash", "hash", hash)
 			errorResp.Error = "Invalid hash. Check your URL"
-			renderHtml(w, "error.html", errorResp)
+			renderHTML(w, "error.html", errorResp)
 			return
 		}
 
@@ -212,7 +213,7 @@ func (h *StreamHandler) HomeStream() http.HandlerFunc {
 		}
 
 		w.Header().Set("Cache-Control", "max-age=1200")
-		renderHtml(w, "index.html", FileInfo)
+		renderHTML(w, "index.html", FileInfo)
 	}
 }
 
@@ -240,7 +241,7 @@ func (h *StreamHandler) LandingPage() http.HandlerFunc {
 			HeaderImage: h.Cfg.HEADER_IMAGE,
 		}
 		w.Header().Set("Cache-Control", "max-age=1200")
-		renderHtml(w, "home.html", data)
+		renderHTML(w, "home.html", data)
 	}
 }
 
