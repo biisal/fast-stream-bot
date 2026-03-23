@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
-	"os/exec"
 	"strconv"
 	"strings"
 	"sync/atomic"
@@ -226,31 +225,7 @@ func GetMainChannelInviteLink(ctx context.Context, api *tg.Client, cfg *config.C
 	return "", err
 }
 
-type Commit struct {
-	Date    string
-	Message string
-}
 
-func GetCommits() []Commit {
-	separator := "==="
-	cmd := exec.Command("git", "log", "-3", "--pretty=%cd"+separator+"%s", "--date=short")
-	output, err := cmd.Output()
-	if err != nil {
-		slog.Error("Failed to get commits", "error", err)
-		return nil
-	}
-	commits := make([]Commit, 0)
-	for line := range strings.SplitSeq(string(output), "\n") {
-		if strings.Contains(line, separator) {
-			commits = append(commits, Commit{
-				Date:    strings.Split(line, separator)[0],
-				Message: strings.Split(line, separator)[1],
-			},
-			)
-		}
-	}
-	return commits
-}
 
 func ParseMessageAndChannelId(messageIdStr, channelIdStr string, fallbackChannelId int64) (int, int64, error) {
 	messageId, err := strconv.Atoi(messageIdStr)

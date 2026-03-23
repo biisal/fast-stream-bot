@@ -155,7 +155,7 @@ func (b *Bot) SetUpOnMessage() {
 				slog.Error("Failed to send new user log", "error", err)
 			}
 		}
-		bc := commands.NewContext(ctx, m, e, builder, b.Client, b.Sender, userInfo, dbUser, b.userService, b.Cfg)
+		bc := commands.NewContext(ctx, m, e, builder, b.Client, b.Sender, userInfo, dbUser, b.userService, b.Cfg, b.BotUserName)
 		switch m.Media.(type) {
 		case *tg.MessageMediaDocument, *tg.MessageMediaPhoto:
 			_, err = bc.MediaForwarding(commands.MediaForwardParams{Cfg: b.Cfg, Update: update, Client: b.Client})

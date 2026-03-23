@@ -52,23 +52,7 @@
 		<p class="mt-4  text-center text-sm md:text-lg text-blue jet-font">Upload/Forward your video to bot and watch it
 			online or get faster download link</p>
 
-		<div class="w-full mt-8 rounded-lg   transition duration-500 ">
-			<h1 class="pb-2 mb-3 border-b border-blue-400 text-xl md:text-2xl text-blue font-bold uppercase">
-				Updates
-			</h1>
-			<div class="flex flex-col items-center justify-center gap-2 w-full">
-				{{range .Commits}}
-				<div class="bg-blue-400/5 rounded-lg p-2  md:p-4 w-full flex items-start justify-center flex-col">
-					<p class="text-white/60 mb-2"><i class="fa-solid fa-clock "></i> {{.Date}}</p>
-					<h1 class="md:text-lg text-white/80">{{.Message}}</h1>
-				</div>
-				{{else}}
-				<div class="bg-blue-400/5 rounded-lg p-2  md:p-4 w-full flex items-start justify-center flex-col">
-					<p class="text-white/60 mb-2"><i class="fa-solid fa-clock "></i> No updates yet</p>
-				</div>
-				{{end}}
-			</div>
-		</div>
+
 	</div>
 
 	<footer class="mt-12 pt-6 pb-8 text-center border-t border-white/10">

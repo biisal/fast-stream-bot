@@ -29,6 +29,7 @@ type Context struct {
 	sender      *message.Sender
 	client      *telegram.Client
 	cfg         *config.Config
+	botUsername string
 }
 
 func (bc *Context) Reply(msg string) (tg.UpdatesClass, error) {
@@ -38,11 +39,11 @@ func (bc *Context) Reply(msg string) (tg.UpdatesClass, error) {
 func NewContext(ctx context.Context, msg *tg.Message,
 	entities tg.Entities, builder *message.Builder,
 	client *telegram.Client, sender *message.Sender,
-	userInfo *user.TgUser, dbUser *repo.User, userService user.Service, cfg *config.Config,
+	userInfo *user.TgUser, dbUser *repo.User, userService user.Service, cfg *config.Config, botUsername string,
 ) *Context {
 	return &Context{
 		ctx, msg, entities, builder, userInfo,
-		dbUser, userService, sender, client, cfg,
+		dbUser, userService, sender, client, cfg, botUsername,
 	}
 }
 
@@ -85,7 +86,7 @@ Please don't send any sensitive adult content or any illegal content. Otherwise,
 
 	msg += "\n\nfor help send /help"
 
-	shareLink := botutils.GetReferLink(bc.userInfo.Username, bc.userInfo.ID)
+	shareLink := botutils.GetReferLink(bc.botUsername, bc.userInfo.ID)
 	keyboard := markup.InlineKeyboard(
 		markup.Row(
 			markup.URL("Refer", shareLink),

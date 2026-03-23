@@ -228,17 +228,14 @@ func (h *StreamHandler) LandingPage() http.HandlerFunc {
 				break
 			}
 		}
-		commits := botutils.GetCommits()
 		var data = struct {
 			BotLink     string
 			ChannelLink string
-			Commits     []botutils.Commit
 			AppName     string
 			HeaderImage string
 		}{
 			BotLink:     "https://t.me/" + botUsername,
 			ChannelLink: "https://t.me/" + h.Cfg.MAIN_CHANNEL_USERNAME,
-			Commits:     commits,
 			AppName:     h.Cfg.APP_NAME,
 			HeaderImage: h.Cfg.HEADER_IMAGE,
 		}
